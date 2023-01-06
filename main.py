@@ -16,17 +16,48 @@ async def stream():
             data = await ainput()
 
             try:
-                data = data.split(":")
+                splitData = data.split(":")
+            except:
+                continue
+
+            try:
+                vectorData = data.split(";")
             except:
                 continue
                 
-            if (len(data) == 2):
-                name = data[0]
-                value = data[1][1:]
+            if (len(splitData) == 2):
+                name = splitData[0]
+                value = splitData[1][1:]
 
                 if re.search(r"[0-9-.]+", value) != None and value in re.search(r"[0-9-.]+", value).string:
                     await websocket.send(name + " " + name + "=" + value)
+                    # print(name + " " + name + "=" + value)
                 else:
                     await websocket.send(name + " " + name + "=\"" + value + '"')
+            elif (len(vectorData) == 2):
+                name = vectorData[0]
+                values = vectorData[1].split(",")
+
+                result = name + " "
+
+                for i in values:
+                    try:
+                        splitData = i.split(":")
+                    except:
+                        continue
+                        
+                    name = splitData[0]
+                    value = splitData[1][1:]
+
+                    if re.search(r"[0-9-.]+", value) != None and value in re.search(r"[0-9-.]+", value).string:
+                        result += name + "=" + value + ","
+                    else:
+                        result += name + "=\"" + value + '",'
+                
+                await websocket.send(result[:-1])
+                # print(result[:-1])
+
+
+
 
 asyncio.run(stream())
